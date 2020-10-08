@@ -31,7 +31,7 @@ def sort_data(array):
     home2.loc[home2['ms_zoning'] == 'RH', 'ms_cat']='ms2'
     home2.loc[home2['ms_zoning'] == 'FV', 'ms_cat']='ms3'
     home2.loc[home2['ms_zoning'] == 'RM', 'ms_cat']='ms4'
-
+    
     home2['n_cat'] = 'eight' #making a new column for neighborhood category- if there is anything my filters don't catch, they'll roll into "other"
     home2.loc[(home2['neighborhood'] == 'MeadowV') | (home2['neighborhood'] == 'IDOTRR'), 'n_cat']='one'
     home2.loc[(home2['neighborhood'] == 'BRDale') | (home2['neighborhood'] == 'OldTown'), 'n_cat']='two'
@@ -46,6 +46,15 @@ def sort_data(array):
     home2.loc[home2['neighborhood'] == 'NoRidge', 'n_cat']='twelve'
     home2.loc[home2['neighborhood'] == 'NridgeHt', 'n_cat']='thirteen'
     home2.loc[home2['neighborhood'] == 'StoneBr', 'n_cat']='fourteen' #neighborhoods ranked by price 1-14
+    
+    #group neighborhoods
+    home2.loc[(home2['neighborhood'] == 'IDOTRR') | (home2['neighborhood'] == 'BrDale'), 'neighborhood']='IDOBD'
+    home2.loc[ (home2['neighborhood'] == 'SWISU') | (home2['neighborhood'] == 'Landmrk')
+              | (home2['neighborhood'] == 'Blueste'), 'neighborhood']='SWLB'
+    home2.loc[(home2['neighborhood'] == 'NAmes') | (home2['neighborhood'] == 'NPkVill'), 'neighborhood']='NAPV'
+    home2.loc[(home2['neighborhood'] == 'Greens') | (home2['neighborhood'] == 'Blmngtn'), 'neighborhood']='GB'
+    home2.loc[(home2['neighborhood'] == 'Veenker') | (home2['neighborhood'] == 'ClearCr'), 'neighborhood']='VCC'
+    home2.loc[(home2['neighborhood'] == 'NoRidge') | (home2['neighborhood'] == 'GrnHill'), 'neighborhood']='NRGH'
 
     home2['h_cat'] = 1 #new column for heating categories
     home2.loc[home2['heating'] == 'GasA', 'h_cat']=2
@@ -94,7 +103,7 @@ def sort_data(array):
 
 
 def save_test(df, features_list, dum_cols):
-    #df.columns = [col.lower().replace(' ', '_') for col in df.columns] #reformat df columns
+    df.columns = [col.lower().replace(' ', '_') for col in df.columns] #reformat df columns
     df = sort_data(df) #clean training data set
     X = df[features_list]
 
@@ -157,7 +166,7 @@ def save_test(df, features_list, dum_cols):
 
 
 def make_model(df, features_list, dum_cols):
-    #df.columns = [col.lower().replace(' ', '_') for col in df.columns] #reformat df columns
+    df.columns = [col.lower().replace(' ', '_') for col in df.columns] #reformat df columns
     df = sort_data(df) #clean training data set
     X = df[features_list]
 
@@ -177,8 +186,8 @@ def make_model(df, features_list, dum_cols):
     
     print(f'Your training score is {lr.score(X_train, y_train)}') #score training
     print(f'Your test score is {lr.score(X_test, y_test)}') #score test
-    print(f'Your cross val scores are {cross_val_score(lr, X_train, y_train)}') #score
-    print(f'Your mean cross val score is {cross_val_score(lr, X_train, y_train).mean()}') #mean of cross val score
+    print(f'Your cross val scores are {cross_val_score(lr, X, y)}') #score
+    print(f'Your mean cross val score is {cross_val_score(lr, X, y).mean()}') #mean of cross val score
 
     pred = lr.predict(X) #create preds
     
@@ -186,6 +195,11 @@ def make_model(df, features_list, dum_cols):
     residuals.hist()
     plt.axvline(0, color = 'red')
     plt.show() #print residual graph
+    
+    coefs = pd.DataFrame({'coef' : lr.coef_}, index=X.columns) #display coefficients matched with feature name in a data frame
+    coefs['coef_abs'] = coefs['coef'].abs()
+    print(coefs.sort_values(by='coef_abs', ascending=False).head(10).to_markdown())
+    
     return f'Your RMSE for test {pd.Timestamp.now()} is {metrics.mean_squared_error(y, pred)**.5}.' #print RMSE with timestamp
 
 

@@ -1,5 +1,23 @@
-    
-    #set df equal to "home2", run it through this cleaning cycle, then return cleaned data
+#imports
+
+from scipy.stats import ttest_ind
+import pandas as pd
+import numpy as np
+from scipy import stats
+import seaborn as sns
+import matplotlib.pyplot as plt
+import re
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics
+import statsmodels.api as sm
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler, PolynomialFeatures    
+
+#https://www.geeksforgeeks.org/python-difference-two-lists/
+def diff(li1, li2): 
+    return (list(list(set(li1)-set(li2)) + list(set(li2)-set(li1)))) 
+   
+#helpful site (for timestamp code) https://www.geeksforgeeks.org/python-pandas-timestamp-now/
 
 def sort_data(array):
 
@@ -13,21 +31,30 @@ def sort_data(array):
     home2.loc[home2['ms_zoning'] == 'RH', 'ms_cat']='ms2'
     home2.loc[home2['ms_zoning'] == 'FV', 'ms_cat']='ms3'
     home2.loc[home2['ms_zoning'] == 'RM', 'ms_cat']='ms4'
-
-    home2['n_cat'] = 7 #making a new column for neighborhood category- if there is anything my filters don't catch, they'll roll into "other"
-    home2.loc[(home2['neighborhood'] == 'MeadowV') | (home2['neighborhood'] == 'IDOTRR'), 'n_cat']=0
-    home2.loc[(home2['neighborhood'] == 'BRDale') | (home2['neighborhood'] == 'OldTown'), 'n_cat']=1
-    home2.loc[(home2['neighborhood'] == 'Edwards') | (home2['neighborhood'] == 'BrkSide') | (home2['neighborhood'] == 'Sawyer'), 'n_cat']=2
-    home2.loc[(home2['neighborhood'] == 'SWISU') | (home2['neighborhood'] == 'Landmrk') | (home2['neighborhood'] == 'Blueste'), 'n_cat']=3
-    home2.loc[(home2['neighborhood'] == 'NAmes') | (home2['neighborhood'] == 'NPkVill'), 'n_cat']=4
-    home2.loc[home2['neighborhood'] == 'Mitchell', 'n_cat']=5
-    home2.loc[(home2['neighborhood'] == 'Gilbert') | (home2['neighborhood'] == 'SawyerW') | (home2['neighborhood'] == 'NWAmes'), 'n_cat']=6
-    home2.loc[(home2['neighborhood'] == 'Timber') | (home2['neighborhood'] == 'Somerst'), 'n_cat']=8
-    home2.loc[home2['neighborhood'] == 'ClearCr', 'n_cat']=9
-    home2.loc[(home2['neighborhood'] == 'Veenker') | (home2['neighborhood'] == 'GrnHill'), 'n_cat']=10
-    home2.loc[home2['neighborhood'] == 'NoRidge', 'n_cat']=11
-    home2.loc[home2['neighborhood'] == 'NridgeHt', 'n_cat']=12
-    home2.loc[home2['neighborhood'] == 'StoneBr', 'n_cat']=13 #neighborhoods ranked by price 1-14
+    
+    home2['n_cat'] = 'eight' #making a new column for neighborhood category- if there is anything my filters don't catch, they'll roll into "other"
+    home2.loc[(home2['neighborhood'] == 'MeadowV') | (home2['neighborhood'] == 'IDOTRR'), 'n_cat']='one'
+    home2.loc[(home2['neighborhood'] == 'BRDale') | (home2['neighborhood'] == 'OldTown'), 'n_cat']='two'
+    home2.loc[(home2['neighborhood'] == 'Edwards') | (home2['neighborhood'] == 'BrkSide') | (home2['neighborhood'] == 'Sawyer'), 'n_cat']='three'
+    home2.loc[(home2['neighborhood'] == 'SWISU') | (home2['neighborhood'] == 'Landmrk') | (home2['neighborhood'] == 'Blueste'), 'n_cat']='four'
+    home2.loc[(home2['neighborhood'] == 'NAmes') | (home2['neighborhood'] == 'NPkVill'), 'n_cat']='five'
+    home2.loc[home2['neighborhood'] == 'Mitchell', 'n_cat']='six'
+    home2.loc[(home2['neighborhood'] == 'Gilbert') | (home2['neighborhood'] == 'SawyerW') | (home2['neighborhood'] == 'NWAmes'), 'n_cat']='seven'
+    home2.loc[(home2['neighborhood'] == 'Timber') | (home2['neighborhood'] == 'Somerst'), 'n_cat']='nine'
+    home2.loc[home2['neighborhood'] == 'ClearCr', 'n_cat']='ten'
+    home2.loc[(home2['neighborhood'] == 'Veenker') | (home2['neighborhood'] == 'GrnHill'), 'n_cat']='eleven'
+    home2.loc[home2['neighborhood'] == 'NoRidge', 'n_cat']='twelve'
+    home2.loc[home2['neighborhood'] == 'NridgeHt', 'n_cat']='thirteen'
+    home2.loc[home2['neighborhood'] == 'StoneBr', 'n_cat']='fourteen' #neighborhoods ranked by price 1-14
+    
+    #group neighborhoods
+    home2.loc[(home2['neighborhood'] == 'IDOTRR') | (home2['neighborhood'] == 'BrDale'), 'neighborhood']='IDOBD'
+    home2.loc[ (home2['neighborhood'] == 'SWISU') | (home2['neighborhood'] == 'Landmrk')
+              | (home2['neighborhood'] == 'Blueste'), 'neighborhood']='SWLB'
+    home2.loc[(home2['neighborhood'] == 'NAmes') | (home2['neighborhood'] == 'NPkVill'), 'neighborhood']='NAPV'
+    home2.loc[(home2['neighborhood'] == 'Greens') | (home2['neighborhood'] == 'Blmngtn'), 'neighborhood']='GB'
+    home2.loc[(home2['neighborhood'] == 'Veenker') | (home2['neighborhood'] == 'ClearCr'), 'neighborhood']='VCC'
+    home2.loc[(home2['neighborhood'] == 'NoRidge') | (home2['neighborhood'] == 'GrnHill'), 'neighborhood']='NRGH'
 
     home2['h_cat'] = 1 #new column for heating categories
     home2.loc[home2['heating'] == 'GasA', 'h_cat']=2
@@ -62,8 +89,10 @@ def sort_data(array):
 
     home2['nz'] = home2['n_cat'] + home2['ms_cat'] #making a new column for neighborhood + zone
 
+    home2.loc[(home2['overall_qual']==1) | (home2['overall_qual']==2), 'overall_qual']=1.5 #have to combine these because test set does not have any 1's
+
     #new features
-    #home2['oqual_gla'] = home2['overall_qual']*home2['gr_liv_area']
+    home2['oqual_gla'] = home2['overall_qual']*home2['gr_liv_area']
     home2['garage'] = home2['garage_cars']*home2['garage_area']
     home2['liv_tot'] = home2['total_bsmt_sf']*home2['1st_flr_sf']*home2['gr_liv_area']
     home2['bedbath'] = (home2['half_bath'] + home2['full_bath']) / home2['bedroom_abvgr']
@@ -74,16 +103,17 @@ def sort_data(array):
 
 
 def save_test(df, features_list, dum_cols):
+    df.columns = [col.lower().replace(' ', '_') for col in df.columns] #reformat df columns
     df = sort_data(df) #clean training data set
     X = df[features_list]
-    #X['mas_vnr_area'].fillna(X['mas_vnr_area'].mean(), inplace=True) #filling in mean for this column's nans
-    #X.fillna(0, inplace=True) #fill rest of numerical nans with 0
-    #if dum_cols != 0: #if you need to get dummies in any categorical columns, it happens here, otherwise enter '0'
-    # X.apply(lambda x: x.fillna(x.mean()), axis=0)
-    X = pd.get_dummies(X, columns=dum_cols, drop_first=True)
+
+    if dum_cols != 0: #if you need to get dummies in any categorical columns, it happens here, otherwise enter '0'
+        X = pd.get_dummies(X, columns=dum_cols, drop_first=True)
+    
     X = X._get_numeric_data().apply(lambda x: x.fillna(x.mean()), axis=0) #fill all nan numeric empty spots with the mean of that column
+    
     X = X.fillna(0) #fill all other nans with 0
-    print(X.shape)
+    #print(X.shape)
     y = df['saleprice'].map(np.log) #add target
     lr = LinearRegression()
     lr.fit(X, y)
@@ -94,17 +124,24 @@ def save_test(df, features_list, dum_cols):
     sub = test[['id']].copy() #put id numbers in empty array
 
     test = sort_data(test) #run sorting function (above)
-    print(test.shape)
+    #print(test.shape)
 
     X_test = test[features_list] #create X value based on selected features
-    X = X._get_numeric_data().apply(lambda x: x.fillna(x.mean()), axis=0) #fill all nan numeric empty spots with the mean of that column
-    X = X.fillna(0) #fill all other nans with 0
+    if dum_cols != 0:
+        X_test = pd.get_dummies(X_test, columns=dum_cols, drop_first=True)
+    #print(len(X_test.columns))
+    X_test = X_test._get_numeric_data().apply(lambda x: x.fillna(x.mean()), axis=0) #fill all nan numeric empty spots with the mean of that column
+    #print(len(X_test.columns))
+    X_test = X_test.fillna(0) #fill all other nans with 0
     #X_test['mas_vnr_area'].fillna(X_test['mas_vnr_area'].mean(), inplace=True) #filling in mean for this column's nans
     # X_test.fillna(0, inplace=True) #fill rest of numerical nans with 0
-    
-    X_test = pd.get_dummies(X_test, columns=dum_cols, drop_first=True)
-    print(X_test.shape)
-    
+    #print(X_test.columns)
+    #if dum_cols != 0:
+        #X_test = pd.get_dummies(X_test, columns=dum_cols, drop_first=True)
+    #print(X_test.shape)
+    if len(X_test.columns) != len(X.columns): #if i have a mismatch of columns between training and test, my function will end and return which column is the offender
+        return print(diff(X.columns, X_test.columns))
+
     #X_test.fillna(0, inplace=True) #fill rest of numerical nans with 0
     #return X_test.isnull().sum()
     sub['SalePrice'] = lr.predict(X_test) #make new df column from predictions
@@ -115,40 +152,54 @@ def save_test(df, features_list, dum_cols):
     print(sub.head())
     query = input('Save data? Please enter "yes" or "no".')
     if query == 'yes':
-        sub.to_csv(f'models/{pd.Timestamp.now()}.csv', index=False) #save submission as new csv named after timestamp of creation
-        return f"All done, submission {test_name} saved"
+        name = str(pd.Timestamp.now())
+        namelist = []
+        for l in list(name):
+            if l != ' ' and l != '-' and l!= ':':
+                namelist.append(l)
+        name = ''.join(namelist)
+        sub.to_csv(f'models/{name}.csv', index=False) #save submission as new csv named after timestamp of creation
+        return f"All done, submission {name} saved"
     elif query == 'no':
-        return 'Better luck next time'
+        return 'Okay, test over. Better luck next time!'
 
 
 
 def make_model(df, features_list, dum_cols):
+    df.columns = [col.lower().replace(' ', '_') for col in df.columns] #reformat df columns
     df = sort_data(df) #clean training data set
-    X = df[features] #will make nan (should only be numerical) values zeroes
-    #X['mas_vnr_area'].fillna(df['mas_vnr_area'].mean(), inplace=True)
-    #X.fillna(0, inplace=True)
-    X = X._get_numeric_data().apply(lambda x: x.fillna(x.mean()), axis=0) #fill all nan numeric empty spots with the mean of that column
-    X = X.fillna(0)
+    X = df[features_list]
+
     if dum_cols != 0: #if you need to get dummies in any categorical columns, it happens here, otherwise enter '0'
         X = pd.get_dummies(X, columns=dum_cols, drop_first=True)
+    
+    X = X._get_numeric_data().apply(lambda x: x.fillna(x.mean()), axis=0) #fill all nan numeric empty spots with the mean of that column
+    
+    X = X.fillna(0) #fill all other nans with 0
+    #print(X.shape)
     y = df['saleprice'].map(np.log) #add target
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=2) #tt split - from lesson 3.04
-
+    #print(X_train.isnull().sum().sum())
     lr = LinearRegression() #this section for regular linear regression
     lr.fit(X_train, y_train)
     
     print(f'Your training score is {lr.score(X_train, y_train)}') #score training
     print(f'Your test score is {lr.score(X_test, y_test)}') #score test
-    print(f'Your cross val scores are {cross_val_score(lr, X_train, y_train)}') #score
-    print(f'Your mean cross val score is {cross_val_score(lr, X_train, y_train).mean()}') #mean of cross val score
+    print(f'Your cross val scores are {cross_val_score(lr, X, y)}') #score
+    print(f'Your mean cross val score is {cross_val_score(lr, X, y).mean()}') #mean of cross val score
 
-    pred = lr.predict(X_test) #create preds
+    pred = lr.predict(X) #create preds
     
-    residuals = np.exp(y_test) - np.exp(pred) #these are the residuals
+    residuals = np.exp(y) - np.exp(pred) #these are the residuals
     residuals.hist()
     plt.axvline(0, color = 'red')
-    plt.show()
+    plt.show() #print residual graph
+    
+    coefs = pd.DataFrame({'coef' : lr.coef_}, index=X.columns) #display coefficients matched with feature name in a data frame
+    coefs['coef_abs'] = coefs['coef'].abs()
+    print(coefs.sort_values(by='coef_abs', ascending=False).head(10).to_markdown())
+    
     return f'Your RMSE for test {pd.Timestamp.now()} is {metrics.mean_squared_error(y, pred)**.5}.' #print RMSE with timestamp
 
 
