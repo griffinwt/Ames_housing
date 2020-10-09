@@ -14,7 +14,7 @@ The Iowa Neighbor's Association of Homes (IOWANAHOME), a regional realty group, 
 
 ## Summary
 
-My analysis began by examining numerical categories (nb link) a heatmap to evaluate correlation between the numerical features and the target, sale price. I initially chose the top 10 most correlated, and then filtered out 3 that were highly correlated with each other (example: garage area and number of cars that can fit in the garage). As I continued to refine my model, I added correlations above .4, and eventually those above .3 and saw the expected marginal gains at each iteration. This is a heatmap specifically of the aspects I chose to include:
+My analysis began by examining [numerical categories](https://git.generalassemb.ly/willg/project_2/blob/master/notebooks/01_Num_Filters.ipynb) a heatmap to evaluate correlation between the numerical features and the target, sale price. I initially chose the top 10 most correlated, and then filtered out 3 that were highly correlated with each other (example: garage area and number of cars that can fit in the garage). As I continued to refine my model, I added correlations above .4, and eventually those above .3 and saw the expected marginal gains at each iteration. This is a heatmap specifically of the aspects I chose to include:
 
 <img src="./images/heatmap.png" width="75%" height="75%">
 
