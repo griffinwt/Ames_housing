@@ -1,177 +1,102 @@
-# Project 2 - Ames Housing Data and Kaggle Challenge
-
-Welcome to Project 2! It's time to start modeling.
-
-**Primary Learning Objectives:**
-1. Creating and iteratively refining a regression model
-2. Using [Kaggle](https://www.kaggle.com/) to practice the modeling process
-3. Providing business insights through reporting and presentation.
-
-You are tasked with creating a regression model based on the Ames Housing Dataset. This model will predict the price of a house at sale.
-
-The Ames Housing Dataset is an exceptionally detailed and robust dataset with over 70 columns of different features relating to houses.
-
-Secondly, we are hosting a competition on Kaggle to give you the opportunity to practice the following skills:
-
-- Refining models over time
-- Use of train-test split, cross-validation, and data with unknown values for the target to simulate the modeling process
-- The use of Kaggle as a place to practice data science
-
-As always, you will be submitting a technical report and a presentation. **You may find that the best model for Kaggle is not the best model to address your data science problem.**
-
-## Set-up
-
-Before you begin working on this project, please do the following:
-
-1. Sign up for an account on [Kaggle](https://www.kaggle.com/)
-2. **IMPORTANT**: Click this link ([Regression Challenge Sign Up](https://www.kaggle.com/t/cf68f4a276f44b59a3c6c843dbf9ed1e)) to **join** the competition (otherwise you will not be able to make submissions!)
-3. Review the material on the [DSI-US-6 Regression Challenge](https://www.kaggle.com/c/dsi-us-6-project-2-regression-challenge)
-4. Review the [data description](http://jse.amstat.org/v19n3/decock/DataDocumentation.txt).
-
-## The Modeling Process
-
-1. The train dataset has all of the columns that you will need to generate and refine your models. The test dataset has all of those columns except for the target that you are trying to predict in your Regression model.
-2. Generate your regression model using the training data. We expect that within this process, you'll be making use of:
-    - train-test split
-    - cross-validation / grid searching for hyperparameters
-    - strong exploratory data analysis to question correlation and relationship across predictive variables
-    - code that reproducibly and consistently applies feature transformation (such as the preprocessing library)
-3. Predict the values for your target column in the test dataset and submit your predictions to Kaggle to see how your model does against unknown data.
-    - **Note**: Kaggle expects to see your submissions in a specific format. Check the challenge's page to make sure you are formatting your CSVs correctly!
-    - **You are limited to models you've learned in class**. In other words, you cannot use XGBoost, Neural Networks or any other advanced model for this project.
-4. Evaluate your models!
-    - consider your evaluation metrics
-    - consider your baseline score
-    - how can your model be used for inference?
-    - why do you believe your model will generalize to new data?
-
-## Submission
-
-**Materials must be submitted by the beginning of class on December 7.**
-
-Your technical report will be hosted on Github Enterprise. Make sure it includes:
-
-- A README.md (that isn't this file)
-- Jupyter notebook(s) with your analysis and models (renamed to describe your project)
-- At least one successful prediction submission on [DSI-US-6 Regression Challenge](https://www.kaggle.com/c/dsi-us-6-project-2-regression-challenge) --  you should see your name in the "[Leaderboard](https://www.kaggle.com/c/dsi-us-6-project-2-regression-challenge/leaderboard)" tab.
-- Data files
-- Presentation slides
-- Any other necessary files (images, etc.)
-
-**Check with your local instructor for how they would like you to submit your repo for review.**
+- [Problem Statement](#Problem-Statement)
+- [Summary](#Summary)
+- [Next Steps](#Next-Steps)
+- [Data Dictionary](#Data-Dictionary)
+- [External Resources](#External-Resources)
 
 ---
 
-## Presentation Structure
+## Problem Statement
 
-- **Must be within time limit established by local instructor.**
-- Use Google Slides or some other visual aid (Keynote, Powerpoint, etc).
-- Consider the audience. **Check with your local instructor for direction**.
-- Start with the **data science problem**.
-- Use visuals that are appropriately scaled and interpretable.
-- Talk about your procedure/methodology (high level).
-- Talk about your primary findings.
-- Make sure you provide **clear recommendations** that follow logically from your analyses and narrative and answer your data science problem.
-
-Be sure to rehearse and time your presentation before class.
+The Iowa Neighbor's Association of Homes (IOWANAHOME), a regional realty group, has hired my company to build a model to predict house sale prices in the town of Ames, Iowa. In the course of creating realty listings, IOWANAHOME collects 80 data points on each residence and they have provided me with historical data from their records to create and test my model. Specifically, they have requested a model that predicts sale price in Ames with a focus on key categorical features and how zoning and/or geography may or may not affect home prices.
 
 ---
 
-## Rubric
-Your local instructor will evaluate your project (for the most part) using the following criteria.  You should make sure that you consider and/or follow most if not all of the considerations/recommendations outlined below **while** working through your project.
+## Summary
 
-**Scores will be out of 27 points based on the 9 items in the rubric.** <br>
-*3 points per section*<br>
+My analysis began by examining [numerical categories](https://git.generalassemb.ly/willg/project_2/blob/master/notebooks/01_Num_Filters.ipynb) a heatmap to evaluate correlation between the numerical features and the target, sale price. I initially chose the top 10 most correlated, and then filtered out 3 that were highly correlated with each other (example: garage area and number of cars that can fit in the garage). As I continued to refine my model, I added correlations above .4, and eventually those above .3 and saw the expected marginal gains at each iteration. This is a heatmap specifically of most correlated aspects, including some engineered columns which are futher explained in my notebook.
 
-| Score | Interpretation |
-| --- | --- |
-| **0** | *Project fails to meet the outlined expectations; many major issues exist.* |
-| **1** | *Project close to meeting expectations; many minor issues or a few major issues.* |
-| **2** | *Project meets expectations; few (and relatively minor) mistakes.* |
-| **3** | *Project demonstrates a thorough understanding of all of the considerations outlined.* |
+<img src="./images/heatmap.png" width="75%" height="75%">
 
-### The Data Science Process
+Second, in a separate notebook, I evaluated [categorical features](https://git.generalassemb.ly/willg/project_2/blob/master/notebooks/02_Cat_Filters.ipynb). After reading through the full [data dictionary on kaggle](https://www.kaggle.com/c/dsi-us-13-project-2-regression-challenge/data), I selected those which appeared most promising and evaluated them one-by-one to see which had clear groupings in relation to sale price. Having checked value counts, pair plots, and other related metrics (depending on what the category was designed to measure), I made the necesary adjustments in my processing algorithm to include the features which displayed obvious patterns correlated to sale price. In most cases this involved grouping the different components of the features that appeared in similar price brackets into a new column in order to reduce my model's total number of columns and eliminate the possibility of mismatch between columns in training and test. Below is an example of zone sorted by price.
 
-**Problem Statement**
-- Is it clear what the student plans to do?
-- What type of model will be developed?
-- How will success be evaluated?
-- Is the scope of the project appropriate?
-- Is it clear who cares about this or why this is important to investigate?
-- Does the student consider the audience and the primary and secondary stakeholders?
+<img src="./images/msz_pairplot.png" width="75%" height="75%">
 
-**Data Cleaning and EDA**
-- Are missing values imputed appropriately?
-- Are distributions examined and described?
-- Are outliers identified and addressed?
-- Are appropriate summary statistics provided?
-- Are steps taken during data cleaning and EDA framed appropriately?
-- Does the student address whether or not they are likely to be able to answer their problem statement with the provided data given what they've discovered during EDA?
+Third, I combined my numerical and categorical eda into my first attempts at comprehensive modeling in a [Tuning notebook](https://git.generalassemb.ly/willg/project_2/blob/master/notebooks/03_Tuning.ipynb). I also explored polynomial, standard scaler, and eventually settled on a logarithmic transformation to my sale price (y) value in order to minimize the gap to my largest target values and find the deeper linear relationship in my data. While tuning, I opened a separate [test exploration notebook](https://git.generalassemb.ly/willg/project_2/blob/master/notebooks/04_Test_Exploration.ipynb) to look at the test data and compare its features to the train data - anytime I encountered a misfit between dummied categorical columns running my test data through a model, this is where I would look to see why I might have such a mismatch. I also took a look at various [Regularization models](https://git.generalassemb.ly/willg/project_2/blob/master/notebooks/05_Regularization_Models.ipynb) to see if Ridge, RidgeCV or LASSO methods could improve my RMSE by toning down the coefficients. Unfortunately I found that these particular methods did not perform as well as ordinary least squares regression so I did not incoroporate them into my final model.
 
-**Preprocessing and Modeling**
-- Are categorical variables one-hot encoded?
-- Does the student investigate or manufacture features with linear relationships to the target?
-- Have the data been scaled appropriately?
-- Does the student properly split and/or sample the data for validation/training purposes?
-- Does the student utilize feature selection to remove noisy or multi-collinear features?
-- Does the student test and evaluate a variety of models to identify a production algorithm (**AT MINIMUM:** linear regression, lasso, and ridge)?
-- Does the student defend their choice of production model relevant to the data at hand and the problem?
-- Does the student explain how the model works and evaluate its performance successes/downfalls?
+Finally, in my [Production model notebook](https://git.generalassemb.ly/willg/project_2/blob/master/notebooks/06_Final_Production.ipynb), I isolated the combination of features that scored the best RMSE as measured my Kaggle's leaderboard. I wrote three functions in a python file called which I used repeatedly as I tried new combinations of features. My make_model() function takes in three arguments - dataframe name, feature list, categorical feature list - and returns the cross-training scores, RMSE, and a histogram of the residuals. Here is the residual histogram of training predictions for my final model:
 
-**Evaluation and Conceptual Understanding**
-- Does the student accurately identify and explain the baseline score?
-- Does the student select and use metrics relevant to the problem objective?
-- Is more than one metric utilized in order to better assess performance?
-- Does the student interpret the results of their model for purposes of inference?
-- Is domain knowledge demonstrated when interpreting results?
-- Does the student provide appropriate interpretation with regards to descriptive and inferential statistics?
+<img src="./images/20201008125919.199999.png" width="75%" height="75%">
 
-**Conclusion and Recommendations**
-- Does the student provide appropriate context to connect individual steps back to the overall project?
-- Is it clear how the final recommendations were reached?
-- Are the conclusions/recommendations clearly stated?
-- Does the conclusion answer the original problem statement?
-- Does the student address how findings of this research can be applied for the benefit of stakeholders?
-- Are future steps to move the project forward identified?
+We see with this graph that the residuals fall very evenly or "normally" along the line at zero - this indicates that the model over and under predicts at a similar rate and overall our model does a good job combatting skew to one side or the other. The difference between predicted sale price and actual is small and consistent.
 
-### Organization and Professionalism
+Whenever I found a model that scored better than it's predecessors, I fed the same information that my make_model() function accepts into another function I wrote called save_test(). This function instantiated the model, printed my R2 score for the model, then loaded in the test data, cleaned the test data, and showed me the top five rows (head) of my potential kaggle submission dataframe. The function then requests an input command - "yes" or "no"; if I like what I see, I can enter "yes" and it will save the model named after the current timestamp, ensuring that I never accidentally overwrite a previously saved model. It also shows me my 10 largest (absolute value) coeficients - here is that table from my top model:
 
-**Project Organization**
-- Are modules imported correctly (using appropriate aliases)?
-- Are data imported/saved using relative paths?
-- Does the README provide a good executive summary of the project?
-- Is markdown formatting used appropriately to structure notebooks?
-- Are there an appropriate amount of comments to support the code?
-- Are files & directories organized correctly?
-- Are there unnecessary files included?
-- Do files and directories have well-structured, appropriate, consistent names?
 
-**Visualizations**
-- Are sufficient visualizations provided?
-- Do plots accurately demonstrate valid relationships?
-- Are plots labeled properly?
-- Are plots interpreted appropriately?
-- Are plots formatted and scaled appropriately for inclusion in a notebook-based technical report?
+| Feature Name         |     Description |   Model Coefficient |
+|:---------------------|---------:|-----------:|
+| ms_cat_ms3           | Floating Village Zone |   0.320036 |
+| ms_cat_other         | Res Low Density Zone |   0.304347 |
+| ms_cat_ms2           | Res High Density Zone |   0.298745 |
+| ms_cat_ms4           | Res Medium Density Zone |   0.276961 |
+| ex_cat_2             | Good/Excellent Exterior |   0.212645 |
+| k_cat_3              | Excellent Kitchen |   0.192331 |
+| h_cat_3              | Steam Heating |   0.186971 |
+| h_cat_2              | Forced Air Heating |   0.182866 |
+| ex_cat_1             | Typical/Average Exterior |   0.174848 |
+| neighborhood_StoneBr | Stone Brook Neighborhood |   0.138507 |
 
-**Python Syntax and Control Flow**
-- Is care taken to write human readable code?
-- Is the code syntactically correct (no runtime errors)?
-- Does the code generate desired results (logically correct)?
-- Does the code follows general best practices and style guidelines?
-- Are Pandas functions used appropriately?
-- Are `sklearn` methods used appropriately?
+It is evident from the table that Zoning, Kitchen Quality, Heating, External Condition, and to a lesser extent Neighborhood have important correlations to sale price that IOWANAHOME realtors would be wise to consider. By noting these features in potential homes for sale and encouraging selling clients to touch up these features, or by telling purchasing clients to prioritize these features with an eye on resale, the organization can add a higher level of value and expertise to all of their business interactions.
 
-**Presentation**
-- Is the problem statement clearly presented?
-- Does a strong narrative run through the presentation building toward a final conclusion?
-- Are the conclusions/recommendations clearly stated?
-- Is the level of technicality appropriate for the intended audience?
-- Is the student substantially over or under time?
-- Does the student appropriately pace their presentation?
-- Does the student deliver their message with clarity and volume?
-- Are appropriate visualizations generated for the intended audience?
-- Are visualizations necessary and useful for supporting conclusions/explaining findings?
+---
 
-### REMEMBER:
+### Next Steps
 
-This is a learning environment and you are encouraged to try new things, even if they end up failing. While this rubric outlines what we look for in a _good_ project, it is up to you to go above and beyond to create a _great_ project. **Learn from your failures and you'll be prepared to succeed in the workforce**.
+With more data, I could make this model even more accurate! I could also spend more time creating and testing engineered features that might further increase the model's accuracy. I would also like to explore some of the more minute or less obviously significant features which I was forced to discard in the interest of timeliness.
+
+---
+
+### Data Dictionary
+
+My best model from the [Final Production Notebook](https://git.generalassemb.ly/willg/project_2/blob/master/notebooks/06_Final_Production.ipynb) included the following 30 features:
+
+|Feature|Type|Description|
+|---|---|---|
+|**overall_qual**|float|Overall Home Quality Rating (1-10)|
+|**year_built**|int|Year home was built|
+|**total_bsmt_sf**|float|Total Basement Square Feet|
+|**gr_liv_area**|float|Above Grade Living Area|
+|**full_bath**|int|Number of full bathrooms|
+|**garage_area**|float|Total Garage Square Feet|
+|**mas_vnr_area**|float|Masonry Veneer Square Feet|
+|**totrms_abvgrd**|int|Total number of rooms above grade|
+|**fireplaces**|int|Number of fireplaces in home|
+|**bsmtfin_sf_1**|float|Finished basement square feet|
+|**oqual_gla**|float|Engineered; overall quality times above grade living area|
+|**garage**|float|Number of cars that fit in garage times garage area|
+|**liv_tot**|float|Engineered; basement square feet times 1st floor square feet times above grade living area|
+|**lot_frontage**|float|Linear feet of street connected to property|
+|**lot_area**|float|Lot size in square feet|
+|**wood_deck_sf**|float|Deck size in square feet|
+|**open_porch_sf**|float|Open porch area in square feet|
+|**2nd_flr_sf**|float|Second floor square feet|
+|**bsmt_full_bath**|int|Number of full bathrooms in basement|
+|**half_bath**|int|Number of half bathrooms|
+|**ms_cat**|string|Engineered; housing zone (grouped)|
+|**bldg_type**|string|Type of dwelling|
+|**st_cat**|string|Engineered; sale type (grouped)|
+|**hs_cat**|string|Engineered; housing style (grouped)|
+|**mas_cat**|string|Engineered; masonry style (grouped)|
+|**ex_cat**|string|Engineered; exterior condition (grouped)|
+|**h_cat**|string|Engineered; heating type (grouped)|
+|**k_cat**|string|Engineered; kitchen quality rating (grouped)|
+|**cen_cat**|string|Central air present|
+|**neighborhood**|string|Neighborhood where home is located|
+
+---
+
+### External Resources
+Kaggle Link:  
+https://www.kaggle.com/c/dsi-us-13-project-2-regression-challenge/overview  
+Article referenced in slides:  
+https://who13.com/news/winter-storm-bringing-traffic-to-a-standstill-across-iowa/
